@@ -17,7 +17,7 @@ MvcFront
 - Add the views and update the shared layout page.
 - Make sure docker desktop and all Dapr containers are running before running.
 - Specify the Dapr components folder using '--components-path' directive when running (see Dapr Components section).
-	- dapr run --app-id mvcfront --app-port 5002 --dapr-http-port 50002 dotnet run --components-path "..\components"
+	- dapr run --app-id mvcfront --app-port 5002 --dapr-http-port 50002 dotnet run --components-path '..\components'
 
 Orders Api
 ==========
@@ -38,7 +38,7 @@ Orders Api
 - Register the OrderRepository in Startup.ConfigureServices() method.
 - Get SQL Server running on a container. It's very important to map port 1433 to some other port to avoid screwing up the local SQL instance.
 - The following command will ensure the SQL Server container matches with the connection string specified in appSettings.json file.
-- 'docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Password1!" -p 1455:1433 --name DaprOrderSql -d mcr.microsoft.com/mssql/server:2019-latest'.
+	- 'docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=Password1!" -p 1455:1433 --name DaprOrderSql -d mcr.microsoft.com/mssql/server:2019-latest'.
 - Try connecting to SQL Server on container using Sql Server Management Studio (SSMS).
 - Set "OrdersApi" as the startup project. Open Nuget Package Manager Console, set "OrdersApi" as the default project and run the following command.
 - 'add-migration initial -output Persistence/Migrations'.
@@ -49,8 +49,8 @@ Orders Api
 - Add a folder named 'Events' and create OrderRegisteredEvent class.
 - Implement the OrderReceived() action to dequeue the OrderReceivedEvent, persist/register it and queue the OrderRegisteredEvent.
 - Run the following command to startup the Orders Api.
-	- dapr run --app-id orderapi --app-port 5003 --dapr-http-port 50003 dotnet run --components-path "..\components"
-- Once FacesApi is done upto queueing OrderProcessedEvent, we can add the OrderProcessed() action to update the order status to complete.
+	- dapr run --app-id orderapi --app-port 5003 --dapr-http-port 50003 dotnet run --components-path '..\components'
+- Once FacesApi is done upto queueing OrderProcessedEvent, we can implement the OrderProcessed() action to update the order status to complete.
 
 FacesApi
 ========
