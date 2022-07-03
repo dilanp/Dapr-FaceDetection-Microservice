@@ -3,7 +3,6 @@ using System.Threading.Tasks;
 using Dapr;
 using Dapr.Client;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.Logging;
 using OrdersApi.Commands;
 using OrdersApi.Events;
@@ -30,8 +29,7 @@ namespace OrdersApi.Controllers
         [HttpPost]
         [Route("OrderReceived")]
         [Topic("eventbus", // Name specified in "components/pubsub.yaml" file.
-            "OrderReceivedEvent") // Same Topic name as the event class.
-        ]
+            "OrderReceivedEvent")] // Same Topic name as the event class.
         public async Task<IActionResult> OrderReceived(OrderReceivedCommand command)
         {
             if (command?.OrderId != null && 
@@ -80,6 +78,42 @@ namespace OrdersApi.Controllers
             }
 
             return BadRequest();
+        }
+
+        [HttpPost]
+        [Route("OrderProcessed")]
+        [Topic("eventbus", // Name specified in "components/pubsub.yaml" file.
+            "OrderProcessedEvent")] // Same Topic name as the event class.
+        public async Task<IActionResult> OrderProcessed(OrderStatusChangedToProcessedCommand command)
+        {
+            _logger.LogInformation("OrderProcessed method entered");
+            if (ModelState.IsValid)
+            {
+                var order = await _orderRepo.GetOrderAsync(command.OrderId);
+                if (order != null)
+                {
+                    // Set order status to Processed.
+                    order.Status = Status.Processed;
+
+                    // Populate order details with processed faces.
+                    for (var j = 0; j < command.Faces.Count; j++)
+                    {
+                        var face = command.Faces[j];
+                        var img = Image.Load(face);
+                        await img.SaveAsync("face" + j + ".jpg");
+                        var orderDetail = new OrderDetail
+                        {
+                            OrderId = order.OrderId,
+                            FaceData = face
+                        };
+                        order.OrderDetails.Add(orderDetail);
+                    }
+
+                    //Update the order.
+                    await _orderRepo.UpdateOrder(order);
+                }
+            }
+            return Ok();
         }
     }
 }

@@ -8,7 +8,7 @@ namespace OrdersApi.Persistence
     {
         public Task<Order> GetOrderAsync(Guid id);
         public Task RegisterOrder(Order order);
-        //public Task UpdateOrder(Order order);
+        Task UpdateOrder(Order order);
 
     }
 }
