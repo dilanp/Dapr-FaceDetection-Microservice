@@ -1,16 +1,20 @@
 
+- At the end of creating all 4 microservices create a launch.bat file (Win) to launch all of them at .
+
 Solution
 ========
 - Create the blank solution.
 - Add the ASP.Net Core MVC Web App project (MvcFront).
 - Add the ASP.Net Core Web Api project (OrdersApi).
 - Add the ASP.Net Core Web Api project (FacesApi).
+- Add the ASP.Net Core Web Api project (NotificationApi).
 
 MvcFront
 ========
 - Change the launchSettings.json file to run it as a Kestrel (console app) at port 5002.
 - Add the Dapr.AspNetCore NuGet package (v1.7.0).
 - Register Dapr in Startup.ConfigureServices() method.
+- Add Dapr pubsub binding for message queueing.
 - Add action methods in HomeController.
 - Add UploadDataCommand model and OrderReceivedEvent classes.
 - Code action methods.
@@ -50,14 +54,15 @@ Orders Api
 - Implement the OrderReceived() action to dequeue the OrderReceivedEvent, persist/register it and queue the OrderRegisteredEvent.
 - Run the following command to startup the Orders Api.
 	- dapr run --app-id orderapi --app-port 5003 --dapr-http-port 50003 dotnet run --components-path '..\components'
-- Once FacesApi is done upto queueing OrderProcessedEvent, we can implement the OrderProcessed() action to update the order status to complete.
+- Once FacesApi is done upto queueing OrderProcessedEvent, we can implement the OrderProcessed() action to update the order status to "Processed".
+- Once NotificationApi is done upto queueing OrderDispatchedEvent, we can implement OrderDispatched() action to update the order status to "Dispatched".
 
 FacesApi
 ========
 - Change the launchSettings.json file to run it as a Kestrel (console app) at port 5004.
 - Add the Dapr.AspNetCore NuGet package (v1.7.0).
 - Add the SixLabors.ImageSharp NuGet package (v2.1.3).
-- Add the Microsoft.Azure.CognitiveServices.Vision.Face Nuget package (v2.8.0-preview.2).
+- Add the Microsoft.Azure.CognitiveServices.Vision.Face Nuget package (v2.7.0-preview.1).
 - Create an Azure Face resource on your Azure subscription and copy credentials into appSettings.json file.
 - Add a class called AzureFaceConfiguration in project root and add properties with same name as in appSettings.json file.
 - Change Startup.ConfigureServices() code to enable SixLabors to synchronously process images.
@@ -69,22 +74,46 @@ FacesApi
 - Add a folder called 'Commands' and create OrderRegisteredCommand which corresponds to OrderRegisteredEvent in OrdersApi project.
 - Add a folder named 'Events' and create OrderProcessedEvent class.
 - Implement the ProcessOrder() action to dequeue the OrderRegisteredEvent and save to state store.
+- Add Dapr binding for cron expression.
+- Add Dapr stateStore binding for stateful service.
 - Implement the Cron() action to retrieve state store object, process it with Azure Faces and queue the OrderProcessedEvent.
 - Run the following command to startup the Faces Api.
-	- dapr run --app-id facesapi --app-port 5004 --dapr-http-port 50004 dotnet run --components-path "..\components"
+	- dapr run --app-id facesapi --app-port 5004 --dapr-http-port 50004 dotnet run --components-path '..\components'
 - Connect interactively to redis terminal to view/edit/delete state store objects (see Interactive Commands).
 
+NotificationApi
+===============
+- Change the launchSettings.json file to run it as a Kestrel (console app) at port 5004.
+- Add the Dapr.AspNetCore NuGet package (v1.7.0).
+- Add the SixLabors.ImageSharp NuGet package (v2.1.3).
+- Register Dapr in Startup.ConfigureServices() method.
+- Add 'app.UseCloudEvents()' call in Startup.Configure() to enable middleware.
+- Add 'endpoints.MapSubscribeHandler()' call in Startup.Configure() to enable middleware.
+- Add an empty API controller called 'NotificationController' and remove the default route.
+- Add a folder called 'Commands' and create DispatchOrderCommand which corresponds to OrderProcessedEvent in OrdersApi project.
+- Add a folder named 'Events' and create OrderDispatchedEvent class.
+- Add a folder named 'Helpers' and create EmailUtils class. Then, code CreateEmailBody() method to generate email body.
+- Add Dapr output binding for sending emails.
+- Run "maildev" container to act as SMTP server for sending emails.
+	- docker run -d -p 4000:80 -p 4025:25 --name fds-maildev maildev/maildev:latest
+	- port 80 mapped to 4000 to see emails coming through the mail server.
+	- port 25 is the SMTP port mapped to 4025.
+	- container name given is "fds-maildev".
+- Run the following command to startup the Faces Api.
+	- dapr run --app-id notificationapi --app-port 5005 --dapr-http-port 50005 dotnet run --components-path '..\components'
+	
 Dapr Components
 ===============
 - Create a new "components" folder where the solution file is located.
 - Copy pubsub.yaml config file from '%userprofile%\.dapr\components' folder. Make sure that the 'name' match with code wherever 'pubsubName' is used to queue events.
 - Copy statestore.yaml config file from '%userprofile%\.dapr\components' folder. Make sure that the 'name' match with code wherever 'storeName' is used to store/retrieve state.
 - Draft binding-cron.yaml config file to specify CRON expresion to fire the Cron() action scheduled. Make sure that the 'name' match with code with template specified in [HttpPost] attribute of Cron() action.
+- Draft binding-email.yaml config file to specify output binding required to send emails.
 
 Interactive Commands
 ====================
 - Run the following command to interactively connect to redis terminal. Make sure dapr_redis is running in Docker Desktop.
-	- 'docker run --rm -it --link dapr_redis redis redis-cli -h dapr_redis'
+	- docker run --rm -it --link dapr_redis redis redis-cli -h dapr_redis
 - Redis commands 
 	- 'keys *' - Get all keys.
 	- 'hget key data' - Get values by the key.
@@ -93,4 +122,3 @@ Interactive Commands
 Azure Resources
 ===============
 - Create an Azure Face resource on your Azure subscription.
-- 
