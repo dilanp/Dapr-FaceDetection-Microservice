@@ -7,18 +7,21 @@ using System.IO;
 using System.Threading.Tasks;
 using Dapr.Client;
 using MvcFront.Events;
+using MvcFront.Services;
 
 namespace MvcFront.Controllers
 {
     public class HomeController : Controller
     {
         private readonly DaprClient _daprClient;
+        private readonly IOrderClient _orderClient;
         private readonly ILogger<HomeController> _logger;
 
-        public HomeController(ILogger<HomeController> logger, DaprClient daprClient)
+        public HomeController(ILogger<HomeController> logger, DaprClient daprClient, IOrderClient orderClient)
         {
             _logger = logger;
             _daprClient = daprClient;
+            _orderClient = orderClient;
         }
 
         [HttpGet]
@@ -61,6 +64,12 @@ namespace MvcFront.Controllers
 
             ViewData["OrderId"] = model.OrderId;
             return View("Thanks");
+        }
+
+        public async Task<IActionResult> AllOrders()
+        {
+            var data = await _orderClient.GetOrders();
+            return View(data);
         }
 
         public IActionResult Index()

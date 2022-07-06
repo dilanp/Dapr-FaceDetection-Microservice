@@ -1,0 +1,27 @@
+﻿@model IEnumerable<Order>
+
+@{
+    ViewData["Title"] = "All Orders";
+}
+
+<table>
+    <thead>
+    <tr>
+        <td>Order Id</td>
+        <td>Photo Url</td>
+        <td>User Email</td>
+        <td>Status</td>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var order in @Model)
+    {
+        <tr>
+            <td>@order.OrderId.ToString("N")</td>
+            <td>@order.PhotoUrl</td>
+            <td>@order.UserEmail</td>
+            <td>@order.Status</td>
+        </tr>
+    }
+    </tbody>
+</table>

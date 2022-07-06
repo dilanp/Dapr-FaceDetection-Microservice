@@ -137,5 +137,11 @@ namespace OrdersApi.Controllers
             return BadRequest();
         }
 
+        [HttpGet("allorders")] // Method name to call from remote clients.
+        public async Task<IEnumerable<Order>> GetAllOrders()
+        {
+            return await _orderRepo.GetAllOrdersAsync();
+        }
+
     }
 }

@@ -9,18 +9,15 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "OrdersApi", "OrdersApi\Orde
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AC531DB4-88DD-4214-853B-A02633B33930}"
 	ProjectSection(SolutionItems) = preProject
-		Dapr-Building-Blocks.png = Dapr-Building-Blocks.png
-		Readme.md = Readme.md
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "AzureResources", "AzureResources", "{24EC4EDE-F63A-4C85-B1B8-ED7BFBABD3FD}"
-	ProjectSection(SolutionItems) = preProject
 		AzureResourceConfigurations\Azure-Face.PNG = AzureResourceConfigurations\Azure-Face.PNG
+		Dapr-Building-Blocks.png = Dapr-Building-Blocks.png
+		launch.bat = launch.bat
+		Readme.md = Readme.md
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FacesApi", "FacesApi\FacesApi.csproj", "{F037564A-6D00-43A2-9011-5EE2A2479BB5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "NotificationApi", "NotificationApi\NotificationApi.csproj", "{CF577430-8808-4202-B133-00EA5D882057}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "NotificationApi", "NotificationApi\NotificationApi.csproj", "{CF577430-8808-4202-B133-00EA5D882057}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -47,9 +44,6 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{24EC4EDE-F63A-4C85-B1B8-ED7BFBABD3FD} = {AC531DB4-88DD-4214-853B-A02633B33930}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {CE491B69-9977-424F-8545-4A89C573AD9D}
