@@ -115,5 +115,27 @@ namespace OrdersApi.Controllers
             }
             return Ok();
         }
+
+        [HttpPost]
+        [Route("orderdispatched")]
+        [Topic("eventbus", // Name specified in "components/pubsub.yaml" file.
+            "OrderDispatchedEvent")] // Same Topic name as the event class.
+        public async Task<IActionResult> OrderDispatched(OrderStatusChangedToDispatchedCommand command)
+        {
+            if (ModelState.IsValid)
+            {
+                _logger.LogInformation("Order dispatched message received : " + command.OrderId);
+                Order order = await _orderRepo.GetOrderAsync(command.OrderId);
+                if (order != null)
+                {
+                    order.Status = Status.Dispatched;
+                    await _orderRepo.UpdateOrder(order);
+                    _logger.LogInformation("Order status changed to dispatched: " + command.OrderId);
+                }
+                return Ok();
+            }
+            return BadRequest();
+        }
+
     }
 }
