@@ -1,6 +1,4 @@
 
-- At the end of creating all 4 microservices create a launch.bat file (Win) to launch all of them at .
-
 Solution
 ========
 - Create the blank solution.
@@ -25,8 +23,9 @@ MvcFront
 - Once GetAllOrdersAsync() action is added to orders api add new view to show all order details and add a link to it.
 - Copy the Order and Status models from orders api into Models folder.
 - Add a folder named "Services" and code OrderClient to fetch orders from orders api.
-- Inject OrderClient dependancy into HomeController and code a new action method - AllOrders.
-- Add new View to show all orders and add a link to _Layout.cshtml page.
+- Add singleton dependancy injection support for OrderClient in Startup.ConfigureServices() method. 
+- Inject OrderClient dependancy into HomeController and code a new action method - AllOrders().
+- Add new View to show all orders and add a link to _Layout.cshtml page to get to it.
 
 Orders Api
 ==========
@@ -106,7 +105,7 @@ NotificationApi
 	- port 25 is the SMTP port mapped to 4025.
 	- container name given is "fds-maildev".
 - Run the following command to startup the Faces Api.
-	- dapr run --app-id notificationapi --app-port 5005 --dapr-http-port 50005 dotnet run --components-path '..\components'
+	- dapr run --app-id notification-service --app-port 5005 --dapr-http-port 50005 dotnet run --components-path '..\components'
 	
 Dapr Components
 ===============
@@ -118,13 +117,52 @@ Dapr Components
 
 Interactive Commands
 ====================
+- Run => 'dapr dashboard' to reveal Dapr dashboard.
+	- http://localhost:8080/overview
+- Run => 'docker ps' to reveal Zipkin port.
+	- http://localhost:9411/zipkin/
 - Run the following command to interactively connect to redis terminal. Make sure dapr_redis is running in Docker Desktop.
 	- docker run --rm -it --link dapr_redis redis redis-cli -h dapr_redis
 - Redis commands 
 	- 'keys *' - Get all keys.
 	- 'hget key data' - Get values by the key.
 	- 'del key' - Delete orderList by the key (and values).
-	
+- At the end of creating all 4 microservices create a launch.bat file (Win) to launch all of them at the same time.
+
+The Dapr service endpoint format
+================================
+http://localhost:{dapr-http-port}/v1.0/invoke/{app-id}/method/{method-name}
+
 Azure Resources
 ===============
 - Create an Azure Face resource on your Azure subscription.
+
+Tye Orchestration
+=================
+- Install Tye
+	- dotnet tool install -g Microsoft.Tye --version "0.11.0-alpha.22111.1"
+- Check installed Tye version
+	- tye --version
+- Move to the solution folder in PowerShell and issue this command to create Tye configuration file.
+	- tye init
+- Inspect the tye.yaml config file and make sure all 4 projects are configured there.
+- Update each service in config file with protocol and port number under bindings.
+- Add Sql Server database container details to the config.
+- Change the DB setup in OrdersApi.Startup.ConfigureServices() method to use the above Sql Server config.
+- Add a "CustomConfig" section to appsettings.Development.json to indicate whether DB migrations needs running (RunDbMigrations).
+- Add an interface called IConfig in OrdersApi project and include RunDbMigrations.
+- Add the Config class inherit from IConfig and get value from appsettings.Development.json.
+- Add the singleton config in OrdersApi.Startup.ConfigureServices() method to fetch the "CustomConfig" settings.
+- Introduce TryRunMigrations() method to run DB migrations based on the config setting and call it at the bottom of OrdersApi.Startup.Configure() method to make sure it runs at the end of the middleware pipeline and everything is initialized before that.
+- Add Dapr and SEQ extensions to the tye.yaml config file.
+- Please note that containers such as dapr_redis and fds-maildev will not be available through Tye dashboard because they are not part of the tye.yaml file.
+- Move to the solution folder and run a Tye build to create docker images of the component setup in the tye.yaml file.
+	-tye build
+- If build doesn't have any errors go ahead and execute a Tye run.
+	- tye run
+- Tye dashboard can be accessed at the following URL.
+	- http://localhost:8000/
+- To debug microservices through Tye first use the command(s) at the solution root.
+	- tye run --debug OrdersApi/OrderApi.csproj
+	- try run --debug *
+- Then in Visual Studio choose, Debug > Attach to process, select OrderApi.exe and use breakpoints to debug.

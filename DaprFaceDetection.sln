@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		Dapr-Building-Blocks.png = Dapr-Building-Blocks.png
 		launch.bat = launch.bat
 		Readme.md = Readme.md
+		tye.yaml = tye.yaml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FacesApi", "FacesApi\FacesApi.csproj", "{F037564A-6D00-43A2-9011-5EE2A2479BB5}"

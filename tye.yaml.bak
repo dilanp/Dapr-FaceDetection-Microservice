@@ -1,0 +1,54 @@
+# tye application configuration file
+# read all about it at https://github.com/dotnet/tye
+#
+# when you've given us a try, we'd love to know what you think:
+#    https://aka.ms/AA7q20u
+#
+
+
+name: microserviceswithdapr
+extensions:
+  - name: dapr
+    log-level: debug
+    components-path: ./components
+
+  - name: seq
+    logPath: ./.logs
+
+services:
+- name: mvcfront
+  project: MvcFront/MvcFront.csproj
+  bindings:
+    - protocol: http
+      port: 5002
+
+- name: ordersapi
+  project: OrdersApi/OrdersApi.csproj
+  bindings:
+    - protocol: http
+      port: 5003
+
+- name: facesapi
+  project: FacesApi/FacesApi.csproj
+  bindings:
+    - protocol: http
+      port: 5004
+
+- name: notificationapi
+  project: NotificationApi/NotificationApi.csproj
+  bindings:
+    - protocol: http
+      port: 5005
+
+- name: sql-order
+  image: mcr.microsoft.com/mssql/server:2019-latest
+  env:
+    - name: SA_PASSWORD
+      value: "Password1!"
+    - name: ACCEPT_EULA
+      value: "Y"
+  bindings:
+    - port: 1456
+      containerPort: 1433
+      connectionString: Server=${host}, ${port};Database=OrdersDb;User Id=sa;Password=${env:SA_PASSWORD};MultipleActiveResultSets=true;
+      
